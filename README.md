@@ -1,7 +1,5 @@
 # Adult Income | Classification & Interactive App  
 
----
-
 __Date Created:__ 2020-06-16  
 __Author:__ Josh Mischung  
 __Email:__ josh@knoasis.io  

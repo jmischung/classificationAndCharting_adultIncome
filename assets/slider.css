@@ -1,0 +1,23 @@
+/* Slider */
+.rc-slider-handle {
+	border: solid 2px #008cba !important;
+	background-color: #008cba !important;
+	width: 16px !important;
+	height: 16px !important;
+	margin-top: -4px !important;
+}
+
+.rc-slider-track {
+	background-color: transparent !important;
+}
+
+.rc-slider-dot {
+	width: 0px !important;
+	height: 0px !important;
+	border: unset !important;
+	border-radius: unset !important;
+}
+
+.rc-slider-rail {
+	height: 8px !important;
+}

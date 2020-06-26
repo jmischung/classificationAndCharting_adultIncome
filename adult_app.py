@@ -92,7 +92,7 @@ radio_marital_status = dbc.FormGroup([
 	className="form-group"
 )
 
-button_run = dbc.Button("Run", color="primary")
+button_run = dbc.Button("Run", color="primary", style={"margin-bottom": "10px"})
 
 display_probability = html.Div(
 	[
@@ -108,6 +108,17 @@ display_probability = html.Div(
 	style={"marginLeft": "10px"}
 )
 
+card_content = [
+	dbc.CardHeader("Probability", style={"fontWeight": "bold"}),
+	dbc.CardBody([
+		html.H2("87.38%", className="card-title"),
+		html.P(
+			"Do I want to write a few things here...",
+			className="card-text"
+		)
+	])
+]
+
 # App layout
 form = dbc.Form([dropdown_sex, slider_age, dropdown_workclass, radio_marital_status, button_run])
 app.layout = dbc.Container(
@@ -117,7 +128,7 @@ app.layout = dbc.Container(
 		dbc.Row(
 			[
 				dbc.Col(form, md=4),
-				dbc.Col(display_probability, md=4)
+				dbc.Col(dbc.Card(card_content, color="light", outline=True), md=4)
 			],
 		)
 	],

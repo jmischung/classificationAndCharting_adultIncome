@@ -8,6 +8,13 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 
+# System
+from joblib import load
+
+# Modeling
+from pandas import DataFrame
+# from category_encoders.woe import WOEEncoder
+
 # Components
 # ----------
 
@@ -77,13 +84,13 @@ radio_marital_status = dbc.FormGroup([
 				labelClassName="form-check-label",
 				inputClassName="form-check-input",
 				options=[
-					{"label": "Never married", "value": "Never-married"},
-					{"label": "Married, civil-spouse", "value": "Married-civ-spouse"},
-					{"label": "Married, spouse absent", "value": "Married-spouse-absent"},
-					{"label": "Married, armed forces spouse", "value": "Married-AF-spouse"},
-					{"label": "Separated", "value": "Separated"},
-					{"label": "Divorced", "value": "Divorced"},
-					{"label": "Widowed", "value": "Widowed"},
+					{"label": "Never married", "value": " Never-married"},
+					{"label": "Married, civil-spouse", "value": " Married-civ-spouse"},
+					{"label": "Married, spouse absent", "value": " Married-spouse-absent"},
+					{"label": "Married, armed forces spouse", "value": " Married-AF-spouse"},
+					{"label": "Separated", "value": " Separated"},
+					{"label": "Divorced", "value": " Divorced"},
+					{"label": "Widowed", "value": " Widowed"},
 				]
 			)
 		]
@@ -93,7 +100,7 @@ radio_marital_status = dbc.FormGroup([
 
 dropdown_relationship_items = [
 	dbc.DropdownMenuItem("Not-in-family", id=" Not-in-family"),
-	dbc.DropdownMenuItem("Husband", id=" Husban"),
+	dbc.DropdownMenuItem("Husband", id=" Husband"),
 	dbc.DropdownMenuItem("Wife", id=" Wife"),
 	dbc.DropdownMenuItem("Own-child", id=" Own-child"),
 	dbc.DropdownMenuItem("Unmarried", id=" Unmarried"),
@@ -127,14 +134,20 @@ dropdown_occupation = dbc.FormGroup([
 			dbc.Select(
 				id="dropdown_occupation",
 				options=[
-					{"label": "State-gov", "value": "State-gov"},
-					{"label": "Self-emp-not-inc", "value": "Self-emp-not-inc"},
-					{"label": "Private", "value": "Private"},
-					{"label": "Federal-gov", "value": "Federal-gov"},
-					{"label": "Local-gov", "value": "Local-gov"},
-					{"label": "Self-emp-inc", "value": "Self-emp-inc"},
-					{"label": "Without-pay", "value": "Without-pay"},
-					{"label": "Never-worked", "value": "Never-worked"},
+					{"label": "Adm-clerical", "value": " Adm-clerical"},
+					{"label": "Exec-managerial", "value": " Exec-managerial"},
+					{"label": "Handlers-cleaners", "value": " Handlers-cleaners"},
+					{"label": "Prof-specialty", "value": " Prof-specialty"},
+					{"label": "Other-service", "value": " Other-service"},
+					{"label": "Sales", "value": " Sales"},
+					{"label": "Craft-repair", "value": " Craft-repair"},
+					{"label": "Transport-moving", "value": " Transport-moving"},
+					{"label": "Farming-fishing", "value": " Farming-fishing"},
+					{"label": "Machine-op-inspct", "value": " Machine-op-inspct"},
+					{"label": "Tech-support", "value": " Tech-support"},
+					{"label": "Protective-serv", "value": " Protective-serv"},
+					{"label": "Armed-Forces", "value": " Armed-Forces"},
+					{"label": "Priv-house-serv", "value": " Priv-house-serv"},
 				]
 			)
 		],
@@ -165,9 +178,18 @@ output_card = dbc.Card(
 	[
 		dbc.CardHeader("Probability", style={"fontWeight": "bold"}),
 		dbc.CardBody([
-			html.H2("0", id="output_probability", className="card-title"),
+			html.H1("0", id="output_probability", className="card-title"),
 			html.P(
-				"Do I want to write a few things here...",
+				[
+					"The model generating the probabilities is the highest performing model given the presented features"
+					" (82.3% accuracy). The overall highest performing model by accuracy, F1, and ROC-AUC scores (89.7%,"
+					" 89.7%, and 96.7 respectively) can be viewed at the linked ",
+					html.A(
+						"GitHub repo.",
+						href="https://github.com/jmischung/classificationAndCharting_adultIncome",
+						target="_blank"
+					)
+				],
 				className="card-text"
 			)
 		])
@@ -175,6 +197,36 @@ output_card = dbc.Card(
 	color="light",
 	outline=True
 )
+
+alert = dbc.Alert(
+			[
+				html.H5("Oops!", className="alert-heading"),
+				html.P("One or more of the inputs hasn't been completed or is invalid...", className="mb-0")
+			],
+			className="alert alert-dismissable alert-danger",
+			color="danger",
+			dismissable=True,
+			is_open=True,
+			duration=6000)
+
+
+# Modeling
+woe = load("woe_transformer.sav")
+clf = load("gbm_model.sav")
+
+
+def model(list_feats):
+	# Create df
+	cols = ['age', 'education', 'marital_status', 'occupation', 'relationship', 'hours_per_week']
+	X = DataFrame(list_feats).transpose()
+	X.columns = cols
+
+	# Encode categorical
+	X.iloc[:, 1:5] = woe.transform(X.iloc[:, 1:5])
+
+	# Predict probability
+	return clf.predict_proba(X)[0][1]
+
 
 # Layout
 form = dbc.Form([slider_age, dropdown_education, radio_marital_status, dropdown_relationship,
@@ -198,7 +250,7 @@ app.layout = dbc.Container(
 	Output("dropdown_relationship_input", "value"),
 	[
 		Input(" Not-in-family", "n_clicks"),
-		Input(" Husban", "n_clicks"),
+		Input(" Husband", "n_clicks"),
 		Input(" Wife", "n_clicks"),
 		Input(" Own-child", "n_clicks"),
 		Input(" Unmarried", "n_clicks"),
@@ -222,30 +274,24 @@ def dropdown_menu(r1, r2, r3, r4, r5, r6):
 		State("slider_age", "value"),
 		State("dropdown_education", "value"),
 		State("radioitems-input", "value"),
-		State("dropdown_relationship_input", "value"),
 		State("dropdown_occupation", "value"),
+		State("dropdown_relationship_input", "value"),
 		State("input_hours", "value")
 	]
 )
-def run_model(n_clicks, age, education, marital, relationship, occupation, hours):
-	inputs = [age, education, marital, relationship, occupation, hours]
+def run_model(n_clicks, age, education, marital, occupation, relationship, hours):
+	inputs = [age, education, marital, occupation, relationship, hours]
+	list_relationship = [" Not-in-family", " Husband", " Wife", " Own-child", " Unmarried", " Other-relative"]
 	context = dash.callback_context
 
 	if not context.triggered:
 		return "0"
-	elif None in inputs:
-		return dbc.Alert(
-			[
-				html.H5("Oops!", className="alert-heading"),
-				html.P("One or more of the inputs hasn't been completed...", className="mb-0")
-			],
-			className="alert alert-dismissable alert-danger",
-			color="danger",
-			dismissable=True,
-			is_open=True,
-			duration=6000)
+	elif (None in inputs) or ("" in inputs) or (relationship not in list_relationship):
+		return alert
 	else:
-		return age
+		print(inputs)
+		prob = model(inputs) * 100
+		return f"{round(prob, 1)}%"
 
 
 # Main block

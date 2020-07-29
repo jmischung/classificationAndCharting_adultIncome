@@ -27,3 +27,6 @@ The objective of this notebook is performing imputing NaN and performing initial
 
 __adultIncome\_nb2_classificationModeling.ipynb__  
 The objective of this notebook is the initial exploration of various classification algorithms that can power a user-facing frontend where inputs are provide by the user and the probability of an outcome is predicted.  
+
+__adultIncome\_nb3_featureEngineeringSelection.ipynb__  
+The objective of this notebook is improvement of the model in terms of classification performance, run-time, and generalizability by exploring interactions between features and searching for the optimal combination of features.

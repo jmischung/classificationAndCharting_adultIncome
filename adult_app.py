@@ -211,8 +211,8 @@ alert = dbc.Alert(
 
 
 # Modeling
-woe = load("woe_transformer.sav")
-clf = load("gbm_model.sav")
+woe = load("./model_components/woe_transformer.sav")
+clf = load("./model_components/gbm_model.sav")
 
 
 def model(list_feats):
@@ -289,7 +289,6 @@ def run_model(n_clicks, age, education, marital, occupation, relationship, hours
 	elif (None in inputs) or ("" in inputs) or (relationship not in list_relationship):
 		return alert
 	else:
-		print(inputs)
 		prob = model(inputs) * 100
 		return f"{round(prob, 1)}%"
 
